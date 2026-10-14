@@ -1,0 +1,147 @@
+{
+ "file": "hazard.json",
+ "hazards": [
+  {
+   "x": 230.0,
+   "side": "S",
+   "v": 1.6,
+   "t0": 0.0,
+   "trig": 20.0,
+   "type": "ped"
+  }
+ ],
+ "space": {
+  "h0_x": [
+   180.0,
+   260.0
+  ],
+  "h0_v": [
+   1.2,
+   2.0
+  ],
+  "h0_trig": [
+   12.0,
+   28.0
+  ]
+ },
+ "world": "town",
+ "exposure": 0.012,
+ "why": "nguời đi bộ bất ngờ băng ngang đường tự phát (jaywalking) từ lề nam khu dân cư, khuất tầm nhìn: thống kê NHTSA/FARS cho thấy khoảng 1.2% các cuốc xe đô thị gặp người băng cắt ngoài vạch sang đường; vận tốc đi bộ tự nhiên 1.2-2.0 m/s; kích hoạt khi khoảng cách còn 12-28 m khi người bước từ mép đường",
+ "exact": {
+  "planner": []
+ },
+ "infeasible": 3,
+ "accepted": 0.998,
+ "conditional_on": "your town's traffic",
+ "baseline": {
+  "n": 1497,
+  "crashes": 2,
+  "avoidable": 0,
+  "unavoidable": 0,
+  "unattributed": 2,
+  "low_speed": 0,
+  "avoidable_foreknown": 0,
+  "overlap_at_start": 0,
+  "by_hazard": {
+   "unattributed": 2
+  },
+  "examples": [
+   {
+    "params": {
+     "cutT0": 9.352368635812072,
+     "cutDur": 5.907917878445237,
+     "cutV": 15.284219946647212,
+     "cutDs": 6.07980086623224,
+     "pedT0": 8.319208916248941,
+     "pedV": 1.436667468321669,
+     "busGo": 12.102670659548851,
+     "tgT": 0.6488336172509247,
+     "cutGap": 9.161032488489436,
+     "pedGap": 9.343508894962126,
+     "mu": 0.5,
+     "pedLook": 1,
+     "cutBrake": 0.0,
+     "civil": true,
+     "h0_trig": 19.073725064044012,
+     "h0_v": 1.9966014294280168,
+     "h0_x": 199.78918902477872
+    },
+    "kind": "unattributed",
+    "low_speed": false,
+    "other": "C2",
+    "t": 12.55,
+    "v_ego": 4.5323872566223145,
+    "fire_t": null,
+    "brake_t": null
+   },
+   {
+    "params": {
+     "cutT0": 9.591206107368986,
+     "cutDur": 5.965386032303043,
+     "cutV": 14.853751243402881,
+     "cutDs": -0.08947072686915902,
+     "pedT0": 6.633644590451255,
+     "pedV": 1.1550275451030314,
+     "busGo": 20.872313896162765,
+     "tgT": 1.312860990792898,
+     "cutGap": 5.723551317365682,
+     "pedGap": 2.1150788561607334,
+     "mu": 0.8,
+     "pedLook": 1,
+     "cutBrake": 0.0,
+     "civil": true,
+     "h0_trig": 24.192004493740725,
+     "h0_v": 1.9403380993982147,
+     "h0_x": 253.98442813187376
+    },
+    "kind": "unattributed",
+    "low_speed": false,
+    "other": "C2",
+    "t": 12.65,
+    "v_ego": 3.1730170249938965,
+    "fire_t": null,
+    "brake_t": null
+   }
+  ],
+  "p": 0.0,
+  "lo": 0.0,
+  "hi": 0.0025596305432898448,
+  "per_trip": 0.0,
+  "per_trip_hi": 3.071556651947814e-05
+ },
+ "chosen": {
+  "n": 1497,
+  "crashes": 0,
+  "avoidable": 0,
+  "unavoidable": 0,
+  "unattributed": 0,
+  "low_speed": 0,
+  "avoidable_foreknown": 0,
+  "overlap_at_start": 0,
+  "by_hazard": {},
+  "examples": [],
+  "p": 0.0,
+  "lo": 0.0,
+  "hi": 0.0025596305432898448,
+  "per_trip": 0.0,
+  "per_trip_hi": 3.071556651947814e-05
+ },
+ "_run": {
+  "mssv": "2A202602617",
+  "town": "A",
+  "quick": false,
+  "step": "mine",
+  "salted": false,
+  "budgets": {
+   "replay_n": 400,
+   "mc_n": 3000,
+   "iters": 8,
+   "per_iter": 300,
+   "final_n": 600,
+   "seeds": 3,
+   "fix_n": 400,
+   "progress_n": 256,
+   "mine_n": 1500
+  }
+ }
+}

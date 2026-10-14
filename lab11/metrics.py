@@ -18,34 +18,81 @@ def ego_events(R: core.Rollout, k: int) -> list[dict]:
 
 
 def min_ttc(R: core.Rollout, cap: float = 10.0) -> np.ndarray:
-    """TODO 1. (K,) smallest time-to-collision between the ego and whatever it is following, capped at `cap` s.
+    """TODO 1. (K,) smallest time-to-collision between the ego and whatever it is following, capped at `cap` s."""
+    K, NF = R.F.shape[:2]
+    ego_idx = core.IX["ego"]
+    ego_F = R.F[:, :, ego_idx, :]
+    x_ego = ego_F[..., 0]
+    z_ego = ego_F[..., 1]
+    hx_ego = ego_F[..., 2]
+    hz_ego = ego_F[..., 3]
+    v_ego = ego_F[..., 4]
 
-    - The ego's leader at frame f is R.EGO[k, f, 3] (an actor index, -1 = nothing ahead).
-    - Gap is bumper to bumper along the ego's heading: lon - 2.3 - (leader length / 2), where
-      lon = (x_leader - x_ego) * hx_ego + (z_leader - z_ego) * hz_ego (the leader's position seen from the ego) and
-      2.3 is half the ego's length. Leader length: core.LEN[j] for actor j; use 0.3 m as the half-length of a
-      pedestrian. Clip the gap at 0.
-    - TTC = gap / (v_ego - v_leader), only while the ego is closing in by more than 0.1 m/s.
-    - A scenario where the ego crashed (see ego_events) returns 0.
-    Shapes: R.F is (K, NF, N, 7) with x, z, hx, hz, v, a, d; core.IX["ego"] is the ego's actor index.
-    Vectorise over frames (a Python loop over 481 frames x K scenarios is too slow for Part C).
-    """
-    raise NotImplementedError("TODO 1: min_ttc")
+    leader_idx = R.EGO[:, :, 3].astype(int)
+    has_leader = (leader_idx >= 0)
+    safe_leader = np.where(has_leader, leader_idx, 0)
+
+    k_idx = np.arange(K)[:, None]
+    f_idx = np.arange(NF)[None, :]
+    leader_F = R.F[k_idx, f_idx, safe_leader, :]
+    x_leader = leader_F[..., 0]
+    z_leader = leader_F[..., 1]
+    v_leader = leader_F[..., 4]
+
+    half_len_all = np.where(core.PEDS, 0.3, core.LEN / 2.0)
+    leader_half_len = half_len_all[safe_leader]
+
+    rx = x_leader - x_ego
+    rz = z_leader - z_ego
+    lon = rx * hx_ego + rz * hz_ego
+    gap = np.maximum(lon - 2.3 - leader_half_len, 0.0)
+    dv = v_ego - v_leader
+
+    valid = has_leader & (dv > 0.1)
+    safe_dv = np.where(valid, dv, 1.0)
+    ttc = np.where(valid, gap / safe_dv, np.inf)
+    res = np.minimum(cap, ttc.min(axis=1))
+
+    for k in range(K):
+        if len(ego_events(R, k)) > 0:
+            res[k] = 0.0
+    return res
 
 
 def contact_type(R: core.Rollout, k: int, event: dict) -> str:
-    """TODO 2. 'front' (the ego ran into it), 'rear' (it ran into the ego) or 'side', at the contact frame.
+    """TODO 2. 'front' (the ego ran into it), 'rear' (it ran into the ego) or 'side', at the contact frame."""
+    f = event["f"]
+    other_party = event["b"] if event["a"] == "ego" else event["a"]
+    ego_idx = core.IX["ego"]
+    other_idx = core.IX[other_party]
 
-    Put the other actor in the ego's frame: lon = r . h, lat = -r_x h_z + r_z h_x with h = (hx, hz) of the ego.
-    'front' if lon > 2.3 and |lat| < 1.6; 'rear' if lon < -2.3 and |lat| < 1.6; otherwise 'side'.
-    """
-    raise NotImplementedError("TODO 2: contact_type")
+    ego_state = R.F[k, f, ego_idx]
+    other_state = R.F[k, f, other_idx]
+
+    rx = other_state[0] - ego_state[0]
+    rz = other_state[1] - ego_state[1]
+    hx = ego_state[2]
+    hz = ego_state[3]
+
+    lon = rx * hx + rz * hz
+    lat = -rx * hz + rz * hx
+
+    if lon > 2.3 and abs(lat) < 1.6:
+        return "front"
+    if lon < -2.3 and abs(lat) < 1.6:
+        return "rear"
+    return "side"
 
 
 def progress_metrics(R: core.Rollout) -> tuple[np.ndarray, np.ndarray]:
     """TODO 9. Two (K,) arrays: the distance the ego covers in the 24 s (sum of frame-to-frame steps, metres),
     and the number of frames where the ego brakes harder than 3 m/s^2 (acceleration column < -3)."""
-    raise NotImplementedError("TODO 9: progress_metrics")
+    e = R.F[:, :, core.IX["ego"]]
+    dx = np.diff(e[..., 0], axis=1)
+    dz = np.diff(e[..., 1], axis=1)
+    dist = np.sum(np.hypot(dx, dz), axis=1)
+    harsh = np.sum(e[..., 5] < -3.0, axis=1)
+    return dist, harsh
 
 
 # ---------------------------------------------------------------- given helpers

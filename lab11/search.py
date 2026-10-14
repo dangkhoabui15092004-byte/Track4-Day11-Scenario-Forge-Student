@@ -12,15 +12,25 @@ def cem_update(Z, Bn, score, prev: dict, rho: float = 0.1, smooth: float = 0.7, 
                p_clip=(0.03, 0.97)) -> dict:
     """TODO 5. One cross-entropy step. Keep the elite = the top ceil(rho * n) rows by score (at least 2;
     higher score = more dangerous; on equal scores the earlier row wins, i.e. np.argsort(-score, kind="stable")),
-    then return a new proposal dict:
+    then return a new proposal dict."""
+    n = len(score)
+    n_elite = max(2, math.ceil(rho * n))
+    order = np.argsort(-score, kind="stable")
+    elite = order[:n_elite]
 
-      mean  = smooth * elite mean + (1 - smooth) * prev["mean"]           (per continuous coordinate)
-      std   = max(min_std, smooth * elite std + (1 - smooth) * prev["std"])
-      p_bin = clip(smooth * elite frequency + (1 - smooth) * prev["p_bin"], *p_clip)  (per binary coordinate)
-      level = the lowest score inside the elite (how dangerous the elite already is)
+    elite_Z = Z[elite]
+    elite_Bn = Bn[elite]
 
-    Why the floors: a std that collapses to 0 or a probability of exactly 0/1 makes importance weights explode."""
-    raise NotImplementedError("TODO 5: cem_update")
+    elite_mean = np.mean(elite_Z, axis=0)
+    elite_std = np.std(elite_Z, axis=0)
+    elite_p_bin = np.mean(elite_Bn, axis=0)
+
+    mean = smooth * elite_mean + (1.0 - smooth) * prev["mean"]
+    std = np.maximum(min_std, smooth * elite_std + (1.0 - smooth) * prev["std"])
+    p_bin = np.clip(smooth * elite_p_bin + (1.0 - smooth) * prev["p_bin"], p_clip[0], p_clip[1])
+    level = float(np.min(score[elite]))
+
+    return dict(mean=mean, std=std, p_bin=p_bin, level=level)
 
 
 # ---------------------------------------------------------------- given

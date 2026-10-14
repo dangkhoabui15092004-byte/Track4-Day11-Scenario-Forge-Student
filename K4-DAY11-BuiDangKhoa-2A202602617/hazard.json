@@ -1,0 +1,23 @@
+{
+  "format": "avsim-studio/1",
+  "params": {},
+  "policy": {},
+  "hazards": [
+    {
+      "type": "ped",
+      "x": 230.0,
+      "side": "S",
+      "v": 1.6,
+      "t0": 0.0,
+      "trig": 20.0
+    }
+  ],
+  "ego": "planner",
+  "space": {
+    "h0_x": [180.0, 260.0],
+    "h0_v": [1.2, 2.0],
+    "h0_trig": [12.0, 28.0]
+  },
+  "exposure": 0.012,
+  "why": "nguời đi bộ bất ngờ băng ngang đường tự phát (jaywalking) từ lề nam khu dân cư, khuất tầm nhìn: thống kê NHTSA/FARS cho thấy khoảng 1.2% các cuốc xe đô thị gặp người băng cắt ngoài vạch sang đường; vận tốc đi bộ tự nhiên 1.2-2.0 m/s; kích hoạt khi khoảng cách còn 12-28 m khi người bước từ mép đường"
+}

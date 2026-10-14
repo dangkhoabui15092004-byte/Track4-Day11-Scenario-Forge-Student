@@ -5,15 +5,25 @@ from avsim import core
 
 
 def label_mode(R: core.Rollout, k: int, event: dict, contact_type) -> str:
-    """TODO 8. Name the kind of failure behind one ego failure event (a collision, or a crosswalk block). Return one of:
+    """TODO 8. Name the kind of failure behind one ego failure event (a collision, or a crosswalk block)."""
+    other_party = event["b"] if event["a"] == "ego" else event["a"]
 
-      'crosswalk_block' - the other party is the crossing pedestrian P1: the ego stopped with its body on the
-                        crosswalk in P1's way (event["kind"] == "block"), or hit P1
-      'rear_ended' - something ran into the ego from behind (use contact_type(R, k, event) == 'rear')
-      'bus_bypass' - the ego hit C2 while C2 was squeezing past the stopped bus: at contact C2 is at x < 112 m
-                     and slower than 6 m/s
-      'cut_in'     - the ego hit C2 in any other situation
-      'other'      - anything else
-    Check in that order. Positions and speeds at contact: R.F[k, event["f"], core.IX["C2"]] (x is column 0, v is 4).
-    """
-    raise NotImplementedError("TODO 8: label_mode")
+    # 1. crosswalk_block
+    if other_party == "P1" or event.get("kind") == "block":
+        return "crosswalk_block"
+
+    # 2. rear_ended
+    if contact_type(R, k, event) == "rear":
+        return "rear_ended"
+
+    # 3. bus_bypass or cut_in
+    if other_party == "C2":
+        f = event["f"]
+        c2_state = R.F[k, f, core.IX["C2"]]
+        x_c2 = c2_state[0]
+        v_c2 = c2_state[4]
+        if x_c2 < 112.0 and v_c2 < 6.0:
+            return "bus_bypass"
+        return "cut_in"
+
+    return "other"
